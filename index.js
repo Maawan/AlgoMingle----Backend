@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
         socket.join(roomId);
         console.log("New User joined the Room", roomIdToSocketsMap);
         if(roomIdToSocketsMap.get(roomId).length === 2){
-            io.to(socket.id).emit("start_the_connection_process" , {oponentSocketId : roomIdToSocketsMap.get(roomId)[0]});
+            io.to(roomIdToSocketsMap.get(roomId)[0]).emit("start_the_connection_process" , {oponentSocketId : roomIdToSocketsMap.get(roomId)[1]});
         }
     }
     
@@ -66,6 +66,7 @@ io.on("connection", (socket) => {
         const newArray = temp.filter((ele) => 
           ele != socket.id
         );
+        io.to(roomId).emit("user:disconnected" , {});
         console.log("This is the final Array" , newArray);
         roomIdToSocketsMap.set(roomId, newArray);
         socketIdToRoomMap.delete(socket.id);
