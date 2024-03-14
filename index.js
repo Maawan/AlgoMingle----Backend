@@ -12,17 +12,17 @@ io.on("connection", (socket) => {
 
   socket.on("interview_init", (payload) => {
     const { roomId } = payload;
-    socket.join(roomId);
+    
     if(roomIdToSocketsMap.has(roomId) && roomIdToSocketsMap.get(roomId).length === 2){
         io.to(socket.id).emit("401-restricted" , {message : "At max only two members can join in interview"});
-        
     }else{
         if (!roomIdToSocketsMap.has(roomId)) {
             roomIdToSocketsMap.set(roomId, []);
         }
         roomIdToSocketsMap.get(roomId).push(socket.id);
         socketIdToRoomMap.set(socket.id, roomId);
-        io.to(roomId).emit("user:joined", { message: "User has joined" });
+        io.to(roomId).emit("user:joined", { message: "User has joined" , id : socket.id});
+        socket.join(roomId);
         console.log("New User joined the Room", roomIdToSocketsMap);
         if(roomIdToSocketsMap.get(roomId).length === 2){
             io.to(socket.id).emit("start_the_connection_process" , {oponentSocketId : roomIdToSocketsMap.get(roomId)[0]});
@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
 
   socket.on("peer:nego:needed", ({ to, offer }) => {
     console.log("peer:nego:needed", offer);
-    io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
+    io.to(to).emit("peer:nego:needed_server", { from: socket.id, offer });
   });
 
   socket.on("share-data" , (payload) => {
@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
 
   socket.on("peer:nego:done", ({ to, ans }) => {
     console.log("peer:nego:done", ans);
-    io.to(to).emit("peer:nego:final", { from: socket.id, ans });
+    io.to(to).emit("peer:nego:final_server", { from: socket.id, ans });
   });
 
 
@@ -73,6 +73,20 @@ io.on("connection", (socket) => {
     }
     console.log("User disconnected ", roomIdToSocketsMap);
   });
+
+  socket.on("call:accepted" , ({to , ans}) => {
+    console.log("Call is accepted bro");
+    io.to(to).emit("server:call_accepted",{from : socket.id , ans});
+  })
+
+  socket.on("user:call" , ({to , offer}) => {
+    console.log("Got a Call bro .... lawde " , to);
+    io.to(to).emit("incommming:call" , {from : socket.id , offer});
+  })
+
+  socket.on("send_stream_please" , ({to}) => {
+    io.to(to).emit("send_streams_server" , {from : socket.id});
+  })
 });
 
 app.listen(5000, () => {
