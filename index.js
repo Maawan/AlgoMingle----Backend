@@ -11,8 +11,8 @@ io.on("connection", (socket) => {
   console.log("Socket Connected ", socket.id);
 
   socket.on("interview_init", (payload) => {
-    const { roomId } = payload;
-    
+    const { roomId , name } = payload;
+    //console.log("Got a init request from " , user);
     if(roomIdToSocketsMap.has(roomId) && roomIdToSocketsMap.get(roomId).length === 2){
         io.to(socket.id).emit("401-restricted" , {message : "At max only two members can join in interview"});
     }else{
@@ -21,18 +21,18 @@ io.on("connection", (socket) => {
         }
         roomIdToSocketsMap.get(roomId).push(socket.id);
         socketIdToRoomMap.set(socket.id, roomId);
-        io.to(roomId).emit("user:joined", { message: "User has joined" , id : socket.id});
+        io.to(roomId).emit("user:joined", { message: "User has joined" , id : socket.id });
         socket.join(roomId);
         console.log("New User joined the Room", roomIdToSocketsMap);
         if(roomIdToSocketsMap.get(roomId).length === 2){
-            io.to(roomIdToSocketsMap.get(roomId)[0]).emit("start_the_connection_process" , {oponentSocketId : roomIdToSocketsMap.get(roomId)[1]});
+            io.to(roomIdToSocketsMap.get(roomId)[0]).emit("start_the_connection_process" , {oponentSocketId : roomIdToSocketsMap.get(roomId)[1] , name});
         }
     }
     
   });
 
   socket.on("incomming_call" , ({to , offer}) => {
-    console.log("Call Recieved from " , to);
+    //console.log("Call Recieved from " , to);
     io.to(to).emit("incomming_call" , {from : socket.id , offer});
   })
 
@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("peer:nego:needed", ({ to, offer }) => {
-    console.log("peer:nego:needed", offer);
+    //console.log("peer:nego:needed", offer);
     io.to(to).emit("peer:nego:needed_server", { from: socket.id, offer });
   });
 
@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("peer:nego:done", ({ to, ans }) => {
-    console.log("peer:nego:done", ans);
+    //console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final_server", { from: socket.id, ans });
   });
 
@@ -76,12 +76,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("call:accepted" , ({to , ans}) => {
-    console.log("Call is accepted bro");
+    //console.log("Call is accepted bro");
     io.to(to).emit("server:call_accepted",{from : socket.id , ans});
   })
 
   socket.on("user:call" , ({to , offer}) => {
-    console.log("Got a Call bro .... lawde " , to);
+    //console.log("Got a Call bro .... lawde " , to);
     io.to(to).emit("incommming:call" , {from : socket.id , offer});
   })
 
