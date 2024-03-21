@@ -91,5 +91,5 @@ io.on("connection", (socket) => {
 });
 
 app.listen(5000, () => {
-  console.log(`Server is Running at 3001`);
+  console.log(`Server is Running at 5000 and WS on 5001`);
 });

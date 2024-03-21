@@ -7,6 +7,11 @@ const app = express();
 const cors = require("cors");
 const connectToDB = require("./config/db")
 const interview = require("./routes/interview")
+const path = require("path");
+
+app.use(express.static(path.join(__dirname,'build')));
+
+
 app.use(express.json());
 app.use(cookieParser());
 connectToDB();
@@ -14,6 +19,16 @@ app.use(morgan("tiny"))
 app.use(cors())
 app.use('/api/v1' , user);
 app.use('/api/v1' , interview);
+
+app.get("/api/*" , (req , res) => {
+    return res.status(404).json({
+        message : "You are probabily hitting the wrong url"
+    })
+    //
+})
+app.get("/*" , (req , res) => {
+    res.sendFile(path.join(__dirname , 'build' , 'index.html'));
+})
 
 app.use(function(err , req , res , next){
     console.log(err);
