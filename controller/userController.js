@@ -2,6 +2,7 @@ const zod = require("zod");
 const Wrapper = require("../middlewares/Wrapper");
 const User = require("../models/user");
 const { sendMail } = require("../utils/sendMail");
+const { sendResetMailWithTemplate, sendNewRegisterMail } = require("../utils/sendResetMail");
 
 
 exports.signup = Wrapper(async function(req , res , next){
@@ -41,6 +42,7 @@ exports.signup = Wrapper(async function(req , res , next){
         httpOnly : true
     }
     await user.save();
+    sendNewRegisterMail({name , email});
     res.status(200).cookie('token' , token , options).json({
         message : "Your account has been successfully created",
         token,
@@ -120,10 +122,9 @@ exports.forgotPassword = Wrapper(async function(req , res , next){
     await user.save();
     console.log("Got mail " , email);
     try {
-        await sendMail({
-            email: "maawan18@gmail.com",
-            subject : "Reset Password",
-            message : `${req.protocol}://${req.hostname}:5173/reset/password/${forgotToken}`
+        await sendResetMailWithTemplate({
+            to: "maawan18@gmail.com",
+            resetLink : `${req.protocol}://${req.hostname}:5173/reset/password/${forgotToken}`
         })
         return res.status(200).json({
             message : "Reset mail has been send"
@@ -131,6 +132,7 @@ exports.forgotPassword = Wrapper(async function(req , res , next){
     } catch (error) {
         user.forgotPasswordToken = undefined;
         user.forgotPasswordExpiry = undefined;
+        console.log(error )
         return res.status(500).json({
             message : "Something went wrong"
         })

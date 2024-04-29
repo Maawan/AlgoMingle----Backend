@@ -4,9 +4,10 @@ const { Server } = require("socket.io");
 const io = new Server(5001, {
   cors: true,
 });
-
 const roomIdToSocketsMap = new Map();
 const socketIdToRoomMap = new Map();
+const tempDataForCdoingMapUsingRoomId = new Map();
+
 io.on("connection", (socket) => {
   console.log("Socket Connected ", socket.id);
 
@@ -30,6 +31,44 @@ io.on("connection", (socket) => {
     }
     
   });
+
+  socket.on("loadCodingArea" , ({from , roomId , language , code}) => {
+    console.log("loadCodingArea"  + from  + " " + roomId + " " + language + " " + code);
+      if(tempDataForCdoingMapUsingRoomId.has(roomId)){
+        io.to(from).emit("editorSync" , {
+          language : tempDataForCdoingMapUsingRoomId.get(roomId).language,
+          code : tempDataForCdoingMapUsingRoomId.get(roomId).code
+        })
+        io.to(from).emit("textSync", tempDataForCdoingMapUsingRoomId.get(roomId).text);
+      }else{
+        tempDataForCdoingMapUsingRoomId.set(roomId , {
+          language,
+          code,
+          
+        })
+      }
+  })
+
+  socket.on("editorSync" , (payload) => {
+    console.log(payload);
+    const roomId = socketIdToRoomMap.get(payload.to);
+    tempDataForCdoingMapUsingRoomId.set(roomId , {
+      ... tempDataForCdoingMapUsingRoomId.get(roomId),
+      language : payload.language,
+      code : payload.code
+     })
+    io.to(payload.to).emit("editorSync" , payload);
+  })
+
+  socket.on("textSync" , ({to , text}) => {
+    console.log("Text Recieved from  " + to + " " + text);
+    const roomId = socketIdToRoomMap.get(to);
+    tempDataForCdoingMapUsingRoomId.set(roomId , {
+      ... tempDataForCdoingMapUsingRoomId.get(roomId),
+      text
+     })
+    io.to(to).emit("textSync" , text);
+  })
 
   socket.on("incomming_call" , ({to , offer}) => {
     //console.log("Call Recieved from " , to);
@@ -89,6 +128,7 @@ io.on("connection", (socket) => {
     io.to(to).emit("send_streams_server" , {from : socket.id});
   })
 });
+
 
 app.listen(5000, () => {
   console.log(`Server is Running at 5000 and WS on 5001`);

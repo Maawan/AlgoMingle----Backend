@@ -26,9 +26,9 @@ app.get("/api/*" , (req , res) => {
     })
     //
 })
-app.get("/*" , (req , res) => {
-    res.sendFile(path.join(__dirname , 'build' , 'index.html'));
-})
+// app.get("/*" , (req , res) => {
+//     res.sendFile(path.join(__dirname , 'build' , 'index.html'));
+// })
 
 app.use(function(err , req , res , next){
     console.log(err);

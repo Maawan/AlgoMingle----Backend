@@ -1,21 +1,21 @@
 const nodemailer = require("nodemailer");
 exports.sendMail = async function(options){
     const transporter = nodemailer.createTransport({
-        host : "sandbox.smtp.mailtrap.io",
-        port : 2525,
+        host : "live.smtp.mailtrap.io",
+        port : 587,
         auth : {
-            user : "d3935386be2675",
-            pass : "6f349b2a1bf6ef"
+            user : "api",
+            pass : "b0ddcdae95629627fc09b980103c7a15"
         }
     });
     const message = await transporter.sendMail({
-        from : "reset@algomingle.com",
+        from : "reset@hayatsoftwares.com",
         to : options.email,
-        subject : options.subject,
-        text : options.message,
-        html : `
-        This is password link send from AlgoMingle.com 
-        <a href=${options.message}>Click here to reset the password</a>`
+        template_uuid: "0c4f3093-55c2-4752-b6f9-4db380eb02fe",
+        template_variables: {
+            "user_email": options.email,
+            "pass_reset_link": options.message
+        }
     })
     await transporter.sendMail(message);
 }
