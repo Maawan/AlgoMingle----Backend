@@ -123,7 +123,7 @@ exports.forgotPassword = Wrapper(async function(req , res , next){
     console.log("Got mail " , email);
     try {
         await sendResetMailWithTemplate({
-            to: "maawan18@gmail.com",
+            to: email,
             resetLink : `${req.protocol}://${req.hostname}:5173/reset/password/${forgotToken}`
         })
         return res.status(200).json({
