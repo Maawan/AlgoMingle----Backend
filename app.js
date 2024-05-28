@@ -21,7 +21,9 @@ app.use('/api/v1' , user);
 app.use('/api/v1' , interview);
 
 app.get("/" , (req , res) => {
-    console.log("Backend is up ... :)")
+    res.status(200).json({
+        message : "Backend chal raha hai ..."
+    })
 })
 // app.get("/*" , (req , res) => {
 //     res.sendFile(path.join(__dirname , 'build' , 'index.html'));
