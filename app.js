@@ -9,7 +9,7 @@ const connectToDB = require("./config/db")
 const interview = require("./routes/interview")
 const path = require("path");
 
-app.use(express.static(path.join(__dirname,'build')));
+// app.use(express.static(path.join(__dirname,'build')));
 
 
 app.use(express.json());
@@ -20,11 +20,8 @@ app.use(cors())
 app.use('/api/v1' , user);
 app.use('/api/v1' , interview);
 
-app.get("/api/*" , (req , res) => {
-    return res.status(404).json({
-        message : "You are probabily hitting the wrong url"
-    })
-    //
+app.get("/" , (req , res) => {
+    console.log("Backend is up ... :)")
 })
 // app.get("/*" , (req , res) => {
 //     res.sendFile(path.join(__dirname , 'build' , 'index.html'));
