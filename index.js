@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
         'X-RapidAPI-Host': 'online-code-compiler.p.rapidapi.com'
       },
       data: {
-        language: payload.language,
+        language: payload.language === "python" ? "python3" : payload.language,
         version: 'latest',
         code: payload.code,
         input: null
