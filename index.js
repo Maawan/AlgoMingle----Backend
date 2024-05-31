@@ -1,5 +1,6 @@
 const app = require("./app");
 require("dotenv").config();
+const axios = require("axios");
 const { Server } = require("socket.io");
 const io = new Server(5001, {
   cors: true,
@@ -48,6 +49,34 @@ io.on("connection", (socket) => {
         })
       }
   })
+
+  socket.on("run_code:frontend" , async (payload) => {
+    console.log("...." , payload.code);
+    const options = {
+      method: 'POST',
+      url: 'https://online-code-compiler.p.rapidapi.com/v1/',
+      headers: {
+        'content-type': 'application/json',
+        'X-RapidAPI-Key': 'dfe33a5c73msh4ef4a986a311d16p1c8564jsn2202c55be28c',
+        'X-RapidAPI-Host': 'online-code-compiler.p.rapidapi.com'
+      },
+      data: {
+        language: payload.language,
+        version: 'latest',
+        code: payload.code,
+        input: null
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      //console.log(response.data);
+      io.to(payload.roomId).emit("code_output" , {output : response.data.output})
+    } catch (error) {
+      io.to(payload.roomId).emit("code_output" , {output : "Compiler Error"})
+    }
+  })
+
 
   socket.on("editorSync" , (payload) => {
     console.log(payload);
